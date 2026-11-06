@@ -44,7 +44,7 @@ def main():
     estado.config(text = f"✅ QR generado correctamente. \n Documento: {nombre_archivo}")
 
 ventana = tk.Tk()
-ventana.title("QR - Juzgado 7")
+ventana.title("QR - Juzgado 7 | Sharepoint v2.0")
 ventana.geometry("500x300")
 ventana.configure(bg = "#35374B")
 
