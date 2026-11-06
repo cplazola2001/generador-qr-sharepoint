@@ -4,44 +4,42 @@ from tkinter import filedialog, messagebox
 import customtkinter as ctk
 import qrcode
 
-def seleccionar_pdf():
-    filetypes = [("Documentos PDF", "*.pdf")]
-    pdf = filedialog.askopenfilename(filetypes=filetypes)
+def generar_qr(url, nombre):
 
-    if pdf:
-        ruta = os.path.basename(pdf)
-        nombre = os.path.splitext(ruta)
-        nombre_archivo = nombre[0]
-        carpeta_guardado = os.path.dirname(pdf)
-        return pdf, nombre_archivo, carpeta_guardado
-    else:
-        return None
+    qr = qrcode.make(url)
 
-def generar_qr(pdf, nombre_archivo, carpeta_guardado):
+    ruta_final = filedialog.asksaveasfilename(
+    defaultextension=".png",
+    filetypes=[("Imágenes PNG", "*.png")],
+    initialfile=f"{nombre}_qr.png"
+    )
 
-    qr = qrcode.make(pdf)
-
-    ruta_final = os.path.join(carpeta_guardado, f"{nombre_archivo}_qr.png")
+    if not ruta_final:
+            messagebox.showinfo("Aviso", "Guardado cancelado.")
+            return False
 
     qr.save(ruta_final)
+    return True
 
 def main():
-    resultado = seleccionar_pdf()
+    url = entrada_url.get()
+
+    if not url:
+        messagebox.showinfo("Aviso", "Debes ingresar un enlace para generar el código QR.")
+        return
+
+    nombre = entrada_nombre.get().strip()
+
+    if not nombre:
+        messagebox.showinfo("Aviso", "Debes ingresar un nombre para guardar tu código QR.")
+        return
+
+    resultado = generar_qr(url, nombre)
 
     if not resultado:
-        messagebox.showinfo("Aviso", "El usuario canceló. Intentar de nuevo.")
         return
-
-    pdf, nombre_archivo, carpeta_guardado = resultado
-
-    try:
-        generar_qr(pdf, nombre_archivo, carpeta_guardado)
-
-    except PermissionError:
-        messagebox.showerror("Error", "No puedes guardar tu QR aquí. Asegúrate de tener tu PDF en una ubicación segura.")
-        return
-
-    estado.config(text = f"✅ QR generado correctamente. \n Documento: {nombre_archivo}")
+    else:
+        estado.config(text = f"✅ QR generado correctamente. \n Documento: {nombre}_qr.png")
 
 ventana = tk.Tk()
 ventana.title("QR - Juzgado 7 | Sharepoint v2.0")
@@ -58,15 +56,43 @@ titulo = tk.Label(
 
 instruccion = tk.Label(
     ventana,
-    text = "Selecciona un documento PDF para generar su código QR.",
-    font = ("Arial", 12),
+    text = "Ingresa un enlace",
+    font = ("Arial", 11),
     bg = "#35374B",
     fg = "#D8DEF9"
 )
 
+entrada_url = ctk.CTkEntry(
+    ventana,
+    placeholder_text = "Pega aquí el enlace de SharePoint",
+    width = 400,
+    bg_color = "#35374B",
+    text_color="#25283F",
+    placeholder_text_color="#64748B",
+    fg_color = "#D8DEF9"
+)
+
+nombre_archivo = tk.Label(
+    ventana,
+    text = "Nombre del archivo",
+    font = ("Arial", 11),
+    bg = "#35374B",
+    fg = "#D8DEF9"
+)
+
+entrada_nombre = ctk.CTkEntry(
+    ventana,
+    placeholder_text = "Ej. Oficio_cortinas_Titi_2026",
+    width = 400,
+    bg_color = "#35374B",
+    text_color="#25283F",
+    placeholder_text_color="#64748B",
+    fg_color = "#D8DEF9"
+)
+
 boton = ctk.CTkButton(
     ventana,
-    text = "Seleccionar PDF",
+    text = "Generar QR",
     command = main,
     bg_color = "#35374B",
     fg_color = "#7B85FF",
@@ -74,14 +100,19 @@ boton = ctk.CTkButton(
 
 estado = tk.Label(
     ventana,
-    text = "Esperando documento...",
+    text = "Esperando URL...",
     bg = "#3F456C",
     fg = "#F5F9F9"
 )
 
 if __name__ == "__main__":
-    titulo.pack()
-    instruccion.pack()
-    boton.pack(pady=80)
+    titulo.pack(pady=(12, 4))
+    instruccion.pack(pady=(0, 12))
+
+    entrada_url.pack(pady=(0,12))
+    nombre_archivo.pack(pady=(0,6))
+    entrada_nombre.pack(pady=(0,16))
+
+    boton.pack(pady=(20, 20))
     estado.pack()
     ventana.mainloop()
