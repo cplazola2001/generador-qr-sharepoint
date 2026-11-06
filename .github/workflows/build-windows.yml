@@ -1,0 +1,33 @@
+name: Compilar Generador QR para Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install customtkinter "qrcode[pil]" pyinstaller
+
+      - name: Compilar ejecutable
+        run: |
+          python -m PyInstaller --noconfirm --onedir --windowed --name GeneradorQR --collect-all customtkinter main.py
+
+      - name: Guardar ejecutable Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: GeneradorQR-Windows
+          path: dist/GeneradorQR/
+          if-no-files-found: error
